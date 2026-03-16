@@ -44,7 +44,8 @@ export default function AuthPage() {
   if (isLoading) return <PageSpinner />;
 
   return (
-    <div className="space-y-8 animate-slide-in max-w-2xl">
+    <div className="flex justify-end animate-slide-in">
+    <div className="space-y-8 w-full max-w-2xl">
       <PageHeader title="Authentication" description="Manage Telegram user account login" />
 
       {/* Status card */}
@@ -139,6 +140,7 @@ export default function AuthPage() {
           </CardBody>
         </Card>
       )}
+    </div>
     </div>
   );
 }
