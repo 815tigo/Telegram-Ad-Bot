@@ -20,7 +20,6 @@ const nav = [
   { href: '/schedules', label: 'Schedules',  icon: CalendarClock   },
   { href: '/logs',      label: 'Logs',       icon: ScrollText      },
   { href: '/replies',   label: 'Replies',    icon: MessageSquare   },
-  { href: '/auth',      label: 'Auth',       icon: ShieldCheck     },
 ];
 
 function ThemeToggle() {

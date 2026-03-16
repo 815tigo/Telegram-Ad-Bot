@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
-import { Sidebar }   from '@/components/layout/Sidebar';
+import { Sidebar }     from '@/components/layout/Sidebar';
+import { AuthButton }  from '@/components/layout/AuthButton';
 
 export const metadata: Metadata = {
   title: 'AdBot — Control Center',
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <div className="flex h-screen overflow-hidden relative z-10">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1 overflow-y-auto relative">
+              <div className="absolute top-6 right-8 z-20">
+                <AuthButton />
+              </div>
               <div className="min-h-full p-8 animate-slide-in">
                 {children}
               </div>
