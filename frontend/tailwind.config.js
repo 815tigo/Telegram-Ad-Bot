@@ -1,0 +1,55 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        bg:              'var(--color-bg)',
+        surface:         'var(--color-surface)',
+        surface2:        'var(--color-surface2)',
+        border:          'var(--color-border)',
+        'border-dim':    'var(--color-border-dim)',
+        'border-bright': 'var(--color-border-bright)',
+        accent:          'var(--color-accent)',
+        'accent-dim':    'var(--color-accent-dim)',
+        purple:          '#7c3aed',
+        'purple-bright': '#a855f7',
+        success:         '#00d97e',
+        danger:          '#ff4560',
+        warn:            '#ffaa00',
+        'text-primary':   'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted':     'var(--color-text-muted)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'Menlo', 'monospace'],
+      },
+      animation: {
+        'pulse-slow':  'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in':     'fadeIn 0.35s ease-out',
+        'slide-in':    'slideIn 0.3s ease-out',
+        'pulse-ring':  'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      boxShadow: {
+        glow:         '0 0 30px var(--shadow-glow), 0 0 0 1px var(--shadow-glow-ring)',
+        'glow-sm':    '0 0 12px var(--shadow-glow)',
+        'glow-lg':    '0 0 60px var(--shadow-glow), 0 0 0 1px var(--shadow-glow-ring)',
+        success:      '0 0 25px rgba(0,217,126,0.18), 0 0 0 1px rgba(0,217,126,0.12)',
+        danger:       '0 0 25px rgba(255,69,96,0.18),  0 0 0 1px rgba(255,69,96,0.12)',
+        purple:       '0 0 25px rgba(124,58,237,0.25), 0 0 0 1px rgba(168,85,247,0.15)',
+        'deep':       '0 25px 80px -12px rgba(0,0,0,var(--shadow-deep-opacity)), 0 10px 30px -8px rgba(0,0,0,var(--shadow-deep-opacity-2))',
+        'inner-glow': 'inset 0 1px 0 var(--shadow-glow-ring)',
+        'card':       'var(--shadow-card)',
+      },
+      backgroundImage: {
+        'grad-accent':  'linear-gradient(135deg, var(--color-accent) 0%, #00ffb3 100%)',
+        'grad-danger':  'linear-gradient(135deg, #ff4560 0%, #ff8f70 100%)',
+        'grad-purple':  'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+        'grad-surface': 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface2) 100%)',
+      },
+    },
+  },
+  plugins: [],
+};

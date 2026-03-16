@@ -1,0 +1,33 @@
+telegram:
+  api_id: ""
+  api_hash: ""
+  phone: ""
+  device_model: "VPS Bot Manager"
+  system_version: "Linux"
+  app_version: "1.0.0"
+
+posting:
+  rate_limit_seconds: 3
+  max_post_workers: 3
+
+scheduler:
+  timezone: "Asia/Kolkata"
+
+database:
+  url: "sqlite:///./data/app.db"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+logging:
+  level: "INFO"
+  file: "data/logs/app.log"
+  max_bytes: 10000000
+  backup_count: 5
+
+features:
+  reply_listener_enabled: true
+
+reply:
+  forward_chat: ""
