@@ -72,7 +72,7 @@ class CampaignCreate(BaseModel):
     interval_minutes: int = Field(default=25, ge=1, le=1440)
     inter_group_delay_secs: int = Field(default=3, ge=0, le=300)
     forward_from_chat: str | None = Field(default=None)
-    forward_from_message_id: int | None = Field(default=None)
+    forward_from_message_id: int | None = Field(default=None, ge=1, le=2_147_483_647)
     group_ids: list[int] = Field(default_factory=list)
 
 
@@ -85,7 +85,7 @@ class CampaignUpdate(BaseModel):
     interval_minutes: int | None = Field(default=None, ge=1, le=1440)
     inter_group_delay_secs: int | None = Field(default=None, ge=0, le=300)
     forward_from_chat: str | None = None
-    forward_from_message_id: int | None = None
+    forward_from_message_id: int | None = Field(default=None, ge=1, le=2_147_483_647)
     active: bool | None = None
     group_ids: list[int] | None = None
 

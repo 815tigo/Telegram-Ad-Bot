@@ -71,13 +71,29 @@ async def _send_to_group(
     for attempt, next_delay in enumerate((*_RETRY_DELAYS, None), start=1):
         attempts = attempt
         try:
-            if campaign.forward_from_chat and campaign.forward_from_message_id:
+            # Forward path: only use if message_id is a valid Telegram message ID
+            # (positive 32-bit integer). A chat/group ID stored here by mistake would
+            # overflow struct.pack('<i', ...) inside Telethon's forward_messages call.
+            _fwd_msg_id = campaign.forward_from_message_id
+            _use_forward = (
+                bool(campaign.forward_from_chat)
+                and _fwd_msg_id is not None
+                and 0 < _fwd_msg_id <= 2_147_483_647
+            )
+            if not _use_forward and campaign.forward_from_message_id is not None:
+                logger.warning(
+                    "Campaign %d: forward_from_message_id=%s is not a valid message ID "
+                    "(must be a positive 32-bit int). Falling back to message_text.",
+                    campaign.id, campaign.forward_from_message_id,
+                )
+
+            if _use_forward:
                 client = await telegram.ensure_connected()
                 dest = await telegram.resolve_entity(group.chat_identifier)
                 source = await telegram.resolve_entity(campaign.forward_from_chat)
                 fwd = await client.forward_messages(
                     entity=dest,
-                    messages=campaign.forward_from_message_id,
+                    messages=_fwd_msg_id,
                     from_peer=source,
                 )
                 fwd_msg_id = fwd.id if hasattr(fwd, "id") else (fwd[0].id if fwd else None)
