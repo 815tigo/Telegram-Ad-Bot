@@ -163,9 +163,15 @@ class TelegramService:
             result = await client(JoinChannelRequest(entity))
             chat = result.chats[0] if result.chats else entity
 
+        from telethon.tl.types import Channel as TelegramChannel
+
         title = getattr(chat, "title", str(chat.id))
-        chat_id = chat.id
         username = getattr(chat, "username", None)
+        # Store channels/supergroups with the -100 prefix so Telethon resolves them correctly
+        if isinstance(chat, TelegramChannel):
+            chat_id = -1_000_000_000_000 - chat.id
+        else:
+            chat_id = -chat.id  # basic group already negative
         logger.info("Joined group: %s (id=%d)", title, chat_id)
         return {"title": title, "chat_id": chat_id, "username": username}
 

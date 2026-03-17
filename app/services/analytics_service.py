@@ -56,12 +56,14 @@ class AnalyticsService:
             db.scalar(select(func.count()).select_from(Reply).where(Reply.campaign_id == campaign_id)) or 0
         )
 
+        total = messages_sent + messages_failed
         return CampaignStats(
             campaign_id=campaign_id,
             campaign_title=campaign.title,
             messages_sent=messages_sent,
             messages_failed=messages_failed,
             total_replies=total_replies,
+            success_rate=round(messages_sent / total * 100, 1) if total > 0 else 0.0,
         )
 
     @staticmethod

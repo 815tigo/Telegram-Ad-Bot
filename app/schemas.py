@@ -196,6 +196,7 @@ class CampaignStats(BaseModel):
     messages_sent: int
     messages_failed: int
     total_replies: int
+    success_rate: float = 0.0
 
 
 class TopCampaign(BaseModel):

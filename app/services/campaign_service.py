@@ -62,6 +62,16 @@ class CampaignService:
         if payload.interval_minutes is not None:
             campaign.interval_minutes = payload.interval_minutes
             campaign.next_run_at = datetime.utcnow() + timedelta(minutes=campaign.interval_minutes)
+            # Keep the auto-created interval schedule in sync
+            from sqlalchemy import update as _sql_update
+            db.execute(
+                _sql_update(CampaignSchedule)
+                .where(
+                    CampaignSchedule.campaign_id == campaign.id,
+                    CampaignSchedule.schedule_type == "interval",
+                )
+                .values(interval_minutes=payload.interval_minutes)
+            )
         if payload.inter_group_delay_secs is not None:
             campaign.inter_group_delay_secs = payload.inter_group_delay_secs
         if payload.media_path is not None:
