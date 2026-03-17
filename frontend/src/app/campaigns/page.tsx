@@ -34,13 +34,16 @@ export default function CampaignsPage() {
   const deleteMut  = useMutation({ mutationFn: campaigns.remove,                      onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }) });
 
   const onSubmit = handleSubmit((data) => {
+    const fwdMsgId = data.forward_from_message_id ? Number(data.forward_from_message_id) : undefined;
+    // Only send forward fields if BOTH are provided and message ID is a valid positive 32-bit int
+    const validFwd = fwdMsgId && fwdMsgId > 0 && fwdMsgId <= 2_147_483_647;
     const payload: CampaignCreate = {
       title:               data.title,
       message_text:        data.message_text,
       interval_minutes:    Number(data.interval_minutes) || 25,
       inter_group_delay_secs: Number(data.inter_group_delay_secs) || 5,
-      forward_from_chat:   data.forward_from_chat || undefined,
-      forward_from_message_id: data.forward_from_message_id ? Number(data.forward_from_message_id) : undefined,
+      forward_from_chat:   (data.forward_from_chat && validFwd) ? data.forward_from_chat : undefined,
+      forward_from_message_id: validFwd ? fwdMsgId : undefined,
       group_ids:           [...selectedGroupIds],
     };
     createMut.mutate(payload);
@@ -72,9 +75,37 @@ export default function CampaignsPage() {
               <div className="md:col-span-2">
                 <Textarea label="Ad Message Text *" rows={4} placeholder="Your advertisement text…" {...register('message_text', { required: 'Required' })} error={errors.message_text?.message} />
               </div>
-              <Input label="Forward From Chat" placeholder="@username or chat_id" {...register('forward_from_chat')} />
-              <Input label="Forward Message ID" type="number" placeholder="Message ID to forward" mono {...register('forward_from_message_id')} />
               <Input label="Inter-Group Delay (secs)" type="number" defaultValue={5} {...register('inter_group_delay_secs')} />
+              <div className="md:col-span-2 border border-border/40 rounded-lg p-4 space-y-3">
+                <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
+                  Forward Mode <span className="normal-case font-normal text-text-muted">(optional — leave blank to send Ad Message Text above)</span>
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Forward From Chat"
+                    placeholder="@username of source chat"
+                    {...register('forward_from_chat')}
+                    hint="e.g. @MyChannel"
+                  />
+                  <Input
+                    label="Forward Message ID"
+                    type="number"
+                    placeholder="e.g. 1234  (NOT a group ID)"
+                    mono
+                    {...register('forward_from_message_id', {
+                      validate: v => {
+                        if (!v) return true;
+                        const n = Number(v);
+                        if (n <= 0 || n > 2_147_483_647)
+                          return 'Must be a positive message ID (e.g. 1234), NOT a group/chat ID';
+                        return true;
+                      }
+                    })}
+                    error={errors.forward_from_message_id?.message}
+                    hint="Right-click a message in Telegram → Copy Message Link → the last number"
+                  />
+                </div>
+              </div>
 
               {/* Group multi-select */}
               <div className="md:col-span-2">
