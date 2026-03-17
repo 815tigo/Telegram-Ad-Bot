@@ -201,40 +201,58 @@ class TelegramService:
 
     async def resolve_entity(self, chat_identifier: str):
         """
-        Resolve a chat identifier to a Telethon InputPeer/entity.
+        Resolve a chat identifier to an InputPeer the Telethon client can use directly.
 
-        Strategy:
-        1. Fast path — try get_entity() which hits the in-memory session cache.
-        2. Slow path — iterate ALL dialogs and match by bare entity ID or username
-           directly from the dialog object (no second cache lookup).  This always
-           works for any group the logged-in account is a member of.
+        Always scans live dialogs and returns ``dialog.input_entity`` (an InputPeerChannel /
+        InputPeerChat / InputPeerUser already built by Telethon from the server response).
+        This avoids struct-packing overflows that occur when channel IDs exceed 32 bits
+        (channel_id > 2^31) and Telethon internally tries to convert a Channel object to
+        an InputPeer via 32-bit struct fields.
+
+        For string identifiers (usernames / invite-links) the built-in ``get_entity`` is
+        still used as it handles those natively.
         """
         client = await self.ensure_connected()
         parsed = self._parse_identifier(chat_identifier)
 
-        # Fast path
-        try:
-            return await client.get_entity(parsed)
-        except (ValueError, TypeError):
-            logger.info("Entity '%s' not in session cache — scanning dialogs...", chat_identifier)
+        # String identifiers (e.g. "@username", "https://t.me/+xxx") — Telethon resolves natively
+        if isinstance(parsed, str):
+            try:
+                return await client.get_entity(parsed)
+            except (ValueError, TypeError):
+                logger.info(
+                    "String entity '%s' not found via get_entity, scanning dialogs...",
+                    chat_identifier,
+                )
+                target_username = parsed.lstrip("@").lower()
+                async for dialog in client.iter_dialogs():
+                    uname = getattr(dialog.entity, "username", None)
+                    if uname and uname.lower() == target_username:
+                        logger.info("Resolved string entity '%s' via dialog scan", chat_identifier)
+                        return dialog.input_entity
+                raise ValueError(
+                    f"Could not resolve entity for '{chat_identifier}'. "
+                    "Make sure the Telegram account is a member of this group/channel."
+                )
 
-        # Slow path: scan every dialog and match directly
+        # Numeric identifier — compute the bare ID (strips the -100 prefix for channels)
         target_bare = self._bare_id(parsed)
-        target_username = parsed.lstrip("@").lower() if isinstance(parsed, str) else None
 
+        logger.info(
+            "Scanning dialogs for numeric entity '%s' (bare_id=%s)...",
+            chat_identifier, target_bare,
+        )
         async for dialog in client.iter_dialogs():
-            entity = dialog.entity
-            eid = getattr(entity, "id", None)
-
-            if target_bare is not None and eid == target_bare:
-                logger.info("Resolved entity '%s' via dialog scan (bare_id=%d)", chat_identifier, eid)
-                return entity
-
-            if target_username is not None:
-                uname = getattr(entity, "username", None)
-                if uname and uname.lower() == target_username:
-                    logger.info("Resolved entity '%s' via dialog scan (username=%s)", chat_identifier, uname)
-                    return entity
+            eid = getattr(dialog.entity, "id", None)
+            if eid is not None and target_bare is not None and eid == target_bare:
+                logger.info(
+                    "Resolved numeric entity '%s' via dialog scan (bare_id=%d)",
+                    chat_identifier, eid,
+                )
+                # Return input_entity (InputPeerChannel/Chat/User) — already serialised
+                # correctly by Telethon from the server response; avoids 32-bit overflow
+                # when channel_id > 2^31.
+                return dialog.input_entity
 
         raise ValueError(
             f"Could not resolve entity for '{chat_identifier}'. "
