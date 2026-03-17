@@ -79,9 +79,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_cors_origins: list[str] = settings.cors_origins or []
+# Always ensure localhost:3000 is allowed for local development
+_LOCAL_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://telegram-ad-bot.vercel.app",
+]
+for _o in _LOCAL_ORIGINS:
+    if _o not in _cors_origins:
+        _cors_origins.append(_o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
