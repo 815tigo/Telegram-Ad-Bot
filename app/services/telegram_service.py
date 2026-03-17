@@ -169,6 +169,15 @@ class TelegramService:
         logger.info("Joined group: %s (id=%d)", title, chat_id)
         return {"title": title, "chat_id": chat_id, "username": username}
 
+    @staticmethod
+    def _resolve_entity(chat_identifier: str) -> str | int:
+        """Convert numeric string IDs to int so Telethon resolves them correctly."""
+        stripped = chat_identifier.strip()
+        try:
+            return int(stripped)
+        except ValueError:
+            return stripped
+
     async def send_message(
         self,
         chat_identifier: str,
@@ -180,8 +189,9 @@ class TelegramService:
         if not await client.is_user_authorized():
             raise RuntimeError("Cannot send message — Telegram user is not authorized")
         selected_parse_mode = "markdown" if parse_mode == "md" else "html"
+        entity = self._resolve_entity(chat_identifier)
         return await client.send_message(
-            entity=chat_identifier,
+            entity=entity,
             message=message,
             parse_mode=selected_parse_mode,
             file=media_path,
