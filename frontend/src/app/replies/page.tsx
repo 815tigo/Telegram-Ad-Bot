@@ -34,7 +34,7 @@ export default function RepliesPage() {
     <div className="space-y-5 animate-slide-in">
       <PageHeader title="Replies" description="Incoming replies detected for your ads" />
 
-      <div className="w-52">
+      <div className="w-full sm:w-52">
         <Select
           options={[{ value: '', label: 'All Campaigns' }, ...(campaignList ?? []).map(c => ({ value: String(c.id), label: c.title }))]}
           value={campaignFilter}
@@ -47,7 +47,7 @@ export default function RepliesPage() {
         {isLoading ? <PageSpinner /> : !replyList?.length ? (
           <EmptyState icon={MessageSquare} title="No replies yet" description="Replies to your ads will appear here" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-responsive">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-secondary">

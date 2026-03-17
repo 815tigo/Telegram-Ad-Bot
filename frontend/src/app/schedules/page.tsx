@@ -104,7 +104,7 @@ export default function SchedulesPage() {
         <Card glow>
           <CardHeader><CardTitle>New Schedule Rule</CardTitle></CardHeader>
           <CardBody>
-            <form onSubmit={handleSubmit(d => createMut.mutate(d))} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit(d => createMut.mutate(d))} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <Select
                 label="Campaign *"
                 options={[{ value: '', label: '— Select —' }, ...(campaignList ?? []).map(c => ({ value: String(c.id), label: c.title }))]}
@@ -143,7 +143,7 @@ export default function SchedulesPage() {
                 <Input label="Cron Expression" placeholder="0 21 * * *" mono {...register('cron_expression')} />
               )}
 
-              <div className="md:col-span-3 flex justify-end gap-2">
+              <div className="sm:col-span-2 md:col-span-3 flex justify-end gap-2">
                 {createMut.error && <span className="text-xs text-danger mr-auto">{(createMut.error as Error).message}</span>}
                 <Button type="submit" variant="primary" loading={createMut.isPending}>Add Schedule</Button>
               </div>
@@ -157,7 +157,7 @@ export default function SchedulesPage() {
         {!allSchedules?.length ? (
           <EmptyState icon={CalendarClock} title="No schedules yet" description="Create a schedule to automate campaign posting" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-responsive">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-secondary">

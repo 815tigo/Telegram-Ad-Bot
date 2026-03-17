@@ -113,7 +113,7 @@ export default function GroupsPage() {
         {!groupList?.length ? (
           <EmptyState icon={Users} title="No groups yet" description="Add groups above to start targeting them" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-responsive">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-secondary">

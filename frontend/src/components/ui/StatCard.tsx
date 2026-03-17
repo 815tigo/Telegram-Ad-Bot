@@ -25,7 +25,7 @@ export function StatCard({ label, value, icon: Icon, color = 'accent', sub }: St
 
   return (
     <div className={cn(
-      'glass rounded-xl p-6 shadow-card relative overflow-hidden',
+      'glass rounded-xl p-4 sm:p-6 shadow-card relative overflow-hidden',
       'border cursor-default select-none',
       'transition-transform duration-200 ease-out',
       'hover:-translate-y-0.5 hover:shadow-glow',
@@ -48,7 +48,7 @@ export function StatCard({ label, value, icon: Icon, color = 'accent', sub }: St
 
         <div className="flex flex-col gap-1.5 min-w-0">
           <div className="text-[11px] font-semibold text-text-secondary uppercase tracking-[0.14em]">{label}</div>
-          <div className={cn('text-3xl font-bold mono tracking-tight', c.grad)}>{value}</div>
+          <div className={cn('text-2xl sm:text-3xl font-bold mono tracking-tight', c.grad)}>{value}</div>
           {sub && <div className="text-xs text-text-muted">{sub}</div>}
         </div>
       </div>

@@ -79,7 +79,7 @@ export default function CampaignsPage() {
               {/* Group multi-select */}
               <div className="md:col-span-2">
                 <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-2">Target Groups</label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto p-4 border border-border/60 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto p-4 border border-border/60 rounded-lg">
                   {(groupList ?? []).filter(g => g.enabled).map(g => (
                     <label key={g.id} className="flex items-center gap-2.5 text-sm text-text-secondary hover:text-text-primary cursor-pointer">
                       <input type="checkbox" className="accent-accent w-4 h-4"
@@ -117,7 +117,7 @@ export default function CampaignsPage() {
         {!campaignList?.length ? (
           <EmptyState icon={Megaphone} title="No campaigns yet" description="Create your first campaign to start sending ads" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-responsive">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-secondary">

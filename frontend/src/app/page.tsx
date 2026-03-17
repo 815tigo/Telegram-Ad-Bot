@@ -26,7 +26,7 @@ export default function OverviewPage() {
       <PageHeader title="Overview" description="Real-time campaign performance at a glance" />
 
       {/* Stat row */}
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         <StatCard label="Campaigns"        value={summary?.total_campaigns  ?? 0} icon={Megaphone}     color="accent"  />
         <StatCard label="Active"           value={summary?.active_campaigns ?? 0} icon={Activity}      color="success" sub="running now" />
         <StatCard label="Groups"           value={summary?.total_groups     ?? 0} icon={Users}         color="accent"  />
@@ -51,7 +51,7 @@ export default function OverviewPage() {
         <CardHeader>
           <CardTitle>Recent Posts</CardTitle>
         </CardHeader>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto table-responsive">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-text-secondary text-xs">

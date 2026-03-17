@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
-import { Sidebar }   from '@/components/layout/Sidebar';
+import { Sidebar, MobileHeader } from '@/components/layout/Sidebar';
 
 export const metadata: Metadata = {
   title: 'AdBot — Control Center',
@@ -11,6 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className="bg-bg text-text-primary">
         <Providers>
           {/* Ambient background orbs (hidden in light mode via CSS) */}
@@ -21,13 +24,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)', '--opacity': '0.10' } as React.CSSProperties} />
           </div>
 
+          {/* Desktop: sidebar + content side by side */}
+          {/* Mobile: stacked header + scrollable content */}
           <div className="flex h-screen overflow-hidden relative z-10">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto">
-              <div className="min-h-full p-8 animate-slide-in">
-                {children}
-              </div>
-            </main>
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <MobileHeader />
+              <main className="flex-1 overflow-y-auto">
+                <div className="min-h-full p-4 sm:p-6 lg:p-8 animate-slide-in">
+                  {children}
+                </div>
+              </main>
+            </div>
           </div>
         </Providers>
       </body>

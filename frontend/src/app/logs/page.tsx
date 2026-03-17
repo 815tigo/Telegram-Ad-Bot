@@ -47,14 +47,14 @@ export default function LogsPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        <div className="w-52">
+        <div className="w-full sm:w-52">
           <Select
             options={[{ value: '', label: 'All Campaigns' }, ...(campaignList ?? []).map(c => ({ value: String(c.id), label: c.title }))]}
             value={campaignFilter}
             onChange={e => { setCampaignFilter(e.target.value); setOffset(0); }}
           />
         </div>
-        <div className="w-36">
+        <div className="w-full sm:w-36">
           <Select
             options={[
               { value: '',       label: 'All Status' },
@@ -75,7 +75,7 @@ export default function LogsPage() {
         {isLoading ? <PageSpinner /> : !logList?.length ? (
           <EmptyState icon={ScrollText} title="No logs found" description="Logs appear here after campaigns run" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-responsive">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-secondary">

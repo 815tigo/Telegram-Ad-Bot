@@ -44,18 +44,18 @@ export default function AuthPage() {
   if (isLoading) return <PageSpinner />;
 
   return (
-    <div className="space-y-8 animate-slide-in max-w-2xl">
+    <div className="space-y-6 sm:space-y-8 animate-slide-in max-w-2xl">
       <PageHeader title="Authentication" description="Manage Telegram user account login" />
 
       {/* Status card */}
       <Card className={status?.is_authorized ? 'border-success/30 shadow-success' : 'border-danger/30'}>
-        <CardBody className="p-8">
-          <div className="flex items-center gap-5">
-            <div className={`p-4 rounded-xl border ${status?.is_authorized ? 'bg-success/10 border-success/30' : 'bg-danger/10 border-danger/30'}`}>
-              {status?.is_authorized ? <ShieldCheck size={30} className="text-success" /> : <ShieldOff size={30} className="text-danger" />}
+        <CardBody className="p-5 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+            <div className={`p-3 sm:p-4 rounded-xl border ${status?.is_authorized ? 'bg-success/10 border-success/30' : 'bg-danger/10 border-danger/30'}`}>
+              {status?.is_authorized ? <ShieldCheck size={24} className="text-success sm:w-[30px] sm:h-[30px]" /> : <ShieldOff size={24} className="text-danger sm:w-[30px] sm:h-[30px]" />}
             </div>
             <div className="flex-1">
-              <div className={`text-lg font-semibold ${status?.is_authorized ? 'text-success' : 'text-danger'}`}>
+              <div className={`text-base sm:text-lg font-semibold ${status?.is_authorized ? 'text-success' : 'text-danger'}`}>
                 {status?.is_authorized ? 'Logged In' : 'Not Logged In'}
               </div>
               {status?.is_authorized ? (
@@ -80,13 +80,13 @@ export default function AuthPage() {
       {/* Login form */}
       {!status?.is_authorized && (
         <Card glow>
-          <CardHeader className="px-8 py-6">
+          <CardHeader className="px-5 sm:px-8 py-4 sm:py-6">
             <CardTitle className="text-base">{step === 'phone' ? 'Step 1 — Enter Phone' : 'Step 2 — Enter OTP'}</CardTitle>
             {step === 'code' && (
               <button className="text-sm text-text-secondary hover:text-text-primary" onClick={() => setStep('phone')}>← Back</button>
             )}
           </CardHeader>
-          <CardBody className="p-8 space-y-5">
+          <CardBody className="p-5 sm:p-8 space-y-5">
             {step === 'phone' ? (
               <form onSubmit={phoneForm.handleSubmit(d => startMut.mutate(d))} className="space-y-5">
                 <Input

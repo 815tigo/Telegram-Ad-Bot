@@ -199,6 +199,9 @@
     animation: shimmer 1.5s infinite;
   }
 
+  /* ── Responsive table ─────────────────────────────────────────── */
+  .table-responsive table { min-width: 640px; }
+
   /* ── Scan-line effect ─────────────────────────────────────────── */
   .scanline::after {
     content: '';
