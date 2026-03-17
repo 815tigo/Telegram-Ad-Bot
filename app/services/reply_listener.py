@@ -34,7 +34,7 @@ class ReplyListener:
         logger.info("ReplyListener: event handler registered")
 
     def stop(self, telegram_service) -> None:
-        if self._handler and telegram_service._client:
+        if self._handler and telegram_service and telegram_service._client:
             try:
                 telegram_service._client.remove_event_handler(self._handler, events.NewMessage)
             except Exception:  # noqa: BLE001
@@ -43,6 +43,8 @@ class ReplyListener:
         logger.info("ReplyListener: event handler removed")
 
     async def _handle_reply(self, event: events.NewMessage.Event) -> None:
+        if self._db_factory is None:
+            return
         replied_to_msg_id: int = event.message.reply_to_msg_id
 
         db = self._db_factory()

@@ -57,7 +57,7 @@ export const campaigns = {
   update:  (id: number, payload: Partial<Campaign>) =>
     req<Campaign>(`/campaigns/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   remove:  (id: number)                      => req<void>(`/campaigns/${id}`, { method: 'DELETE' }),
-  trigger: (id: number)                      => req<{ message: string }>(`/campaigns/${id}/trigger`, { method: 'POST' }),
+  trigger: (id: number)                      => req<{ campaign_id: number; status: string }>(`/campaigns/${id}/trigger`, { method: 'POST' }),
 };
 
 // ─── Schedules ────────────────────────────────────────────────────────────
@@ -72,11 +72,17 @@ export const schedules = {
 };
 
 // ─── Logs ─────────────────────────────────────────────────────────────────
+function toSearchParams(params?: Record<string, unknown>): string {
+  if (!params) return '';
+  const entries = Object.entries(params).filter(([, v]) => v != null && v !== '');
+  return new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+}
+
 export const logs = {
   list: (params?: { campaign_id?: number; status?: string; limit?: number; offset?: number }) =>
-    req<PostingLog[]>(`/logs?${new URLSearchParams(params as Record<string, string> ?? {}).toString()}`),
+    req<PostingLog[]>(`/logs?${toSearchParams(params)}`),
   replies: (params?: { campaign_id?: number; limit?: number; offset?: number }) =>
-    req<Reply[]>(`/logs/replies?${new URLSearchParams(params as Record<string, string> ?? {}).toString()}`),
+    req<Reply[]>(`/logs/replies?${toSearchParams(params)}`),
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────

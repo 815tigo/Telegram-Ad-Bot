@@ -36,7 +36,7 @@ export default function CampaignsPage() {
   const onSubmit = handleSubmit((data) => {
     const payload: CampaignCreate = {
       title:               data.title,
-      message_text:        data.message_text || '',
+      message_text:        data.message_text,
       interval_minutes:    Number(data.interval_minutes) || 25,
       inter_group_delay_secs: Number(data.inter_group_delay_secs) || 5,
       forward_from_chat:   data.forward_from_chat || undefined,
@@ -70,7 +70,7 @@ export default function CampaignsPage() {
               <Input label="Campaign Title *" {...register('title', { required: 'Required' })} error={errors.title?.message} placeholder="e.g. Daily Instagram Promo" />
               <Input label="Interval (minutes)" type="number" defaultValue={25} {...register('interval_minutes')} />
               <div className="md:col-span-2">
-                <Textarea label="Ad Message Text" rows={4} placeholder="Your advertisement text…" {...register('message_text')} />
+                <Textarea label="Ad Message Text *" rows={4} placeholder="Your advertisement text…" {...register('message_text', { required: 'Required' })} error={errors.message_text?.message} />
               </div>
               <Input label="Forward From Chat" placeholder="@username or chat_id" {...register('forward_from_chat')} />
               <Input label="Forward Message ID" type="number" placeholder="Message ID to forward" mono {...register('forward_from_message_id')} />

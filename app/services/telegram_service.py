@@ -46,7 +46,7 @@ class TelegramService:
                 logger.info("Telegram client initialized (authorized=%s)", await self._client.is_user_authorized())
             except Exception as exc:
                 logger.warning("Telegram connect at startup failed (%s) — will retry on first request", exc)
-                asyncio.get_event_loop().call_later(30, lambda: asyncio.ensure_future(self._reconnect_background()))
+                asyncio.get_running_loop().call_later(30, lambda: asyncio.ensure_future(self._reconnect_background()))
 
     async def _reconnect_background(self) -> None:
         for delay in _RECONNECT_DELAYS:

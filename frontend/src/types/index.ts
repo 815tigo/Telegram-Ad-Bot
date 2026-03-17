@@ -31,7 +31,7 @@ export interface Campaign {
 
 export interface CampaignCreate {
   title: string;
-  message_text?: string;
+  message_text: string;
   media_path?: string;
   media_type?: string;
   parse_mode?: string;

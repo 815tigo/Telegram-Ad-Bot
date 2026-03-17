@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +10,8 @@ from app.db.database import get_db
 from app.db.models import Campaign, CampaignGroup
 from app.schemas import CampaignCreate, CampaignResponse, CampaignUpdate, TriggerResult
 from app.services.campaign_service import CampaignService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -48,8 +52,15 @@ def create_campaign(payload: CampaignCreate, db: Session = Depends(get_db)) -> C
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Campaign title must be unique") from exc
 
-    campaign = db.scalar(select(Campaign).where(Campaign.id == campaign.id))
-    campaign_scheduler.sync_jobs_from_db()
+    campaign = db.scalar(
+        select(Campaign)
+        .where(Campaign.id == campaign.id)
+        .options(selectinload(Campaign.group_links))
+    )
+    try:
+        campaign_scheduler.sync_jobs_from_db()
+    except Exception:
+        logger.exception("Failed to sync scheduler jobs after campaign create")
     return _to_response(campaign)
 
 
@@ -82,8 +93,15 @@ def update_campaign(
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Campaign title must be unique") from exc
 
-    campaign = db.scalar(select(Campaign).where(Campaign.id == campaign.id))
-    campaign_scheduler.sync_jobs_from_db()
+    campaign = db.scalar(
+        select(Campaign)
+        .where(Campaign.id == campaign.id)
+        .options(selectinload(Campaign.group_links))
+    )
+    try:
+        campaign_scheduler.sync_jobs_from_db()
+    except Exception:
+        logger.exception("Failed to sync scheduler jobs after campaign update")
     return _to_response(campaign)
 
 
@@ -94,7 +112,10 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db)) -> None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
     db.delete(campaign)
     db.commit()
-    campaign_scheduler.sync_jobs_from_db()
+    try:
+        campaign_scheduler.sync_jobs_from_db()
+    except Exception:
+        logger.exception("Failed to sync scheduler jobs after campaign delete")
 
 
 @router.post("/{campaign_id}/trigger", response_model=TriggerResult)
@@ -102,5 +123,9 @@ async def trigger_campaign(campaign_id: int, db: Session = Depends(get_db)) -> T
     exists = db.get(Campaign, campaign_id)
     if exists is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
-    await campaign_scheduler.trigger_now(campaign_id)
+    try:
+        await campaign_scheduler.trigger_now(campaign_id)
+    except Exception as exc:
+        logger.exception("Failed to trigger campaign %d", campaign_id)
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     return TriggerResult(campaign_id=campaign_id, status="triggered")
