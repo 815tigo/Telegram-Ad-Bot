@@ -16,12 +16,6 @@ from app.core.config import get_settings
 from app.db.models import Campaign, Group, PostingLog
 from app.services.telegram_service import TelegramService
 
-def _resolve_entity(identifier: str) -> str | int:
-    stripped = identifier.strip()
-    try:
-        return int(stripped)
-    except ValueError:
-        return stripped
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +73,12 @@ async def _send_to_group(
         try:
             if campaign.forward_from_chat and campaign.forward_from_message_id:
                 client = await telegram.ensure_connected()
+                dest = await telegram.resolve_entity(group.chat_identifier)
+                source = await telegram.resolve_entity(campaign.forward_from_chat)
                 fwd = await client.forward_messages(
-                    entity=_resolve_entity(group.chat_identifier),
+                    entity=dest,
                     messages=campaign.forward_from_message_id,
-                    from_peer=_resolve_entity(campaign.forward_from_chat),
+                    from_peer=source,
                 )
                 fwd_msg_id = fwd.id if hasattr(fwd, "id") else (fwd[0].id if fwd else None)
                 logger.info(
