@@ -109,6 +109,7 @@ async def _send_to_group(
             logger.warning(
                 "Campaign %d | group %-30s | attempt %d failed: %s",
                 campaign.id, group.chat_identifier, attempt, last_error,
+                exc_info=True,
             )
             if _is_permanent_error(exc):
                 logger.error(

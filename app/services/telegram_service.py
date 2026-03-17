@@ -185,37 +185,34 @@ class TelegramService:
             return stripped
 
     @staticmethod
-    def _bare_id(parsed: str | int) -> int | None:
+    def _candidate_bare_ids(parsed: int) -> set[int]:
         """
-        Return the bare (non-prefixed) integer ID used by Telethon internally.
-        Supergroups/channels stored as -100XXXXXXXXXX → strip the -100 prefix.
-        Basic groups stored as -XXXXXXXXX → strip the minus sign.
+        Given a marked Telegram ID (e.g. -1005171956177), return all possible
+        bare IDs it could correspond to.  We can't always know whether the
+        entity is a Channel or a basic Chat just from the number, so we
+        return both interpretations and match whichever one the dialog has.
         """
-        if not isinstance(parsed, int):
-            return None
+        candidates = set()
+        candidates.add(abs(parsed))                          # |id|
         if parsed < -1_000_000_000_000:
-            return -parsed - 1_000_000_000_000   # supergroup/channel
+            candidates.add(-parsed - 1_000_000_000_000)      # strip -100 prefix
         if parsed < 0:
-            return -parsed                        # basic group
-        return parsed                             # user
+            candidates.add(-parsed)                           # strip minus
+        candidates.add(parsed)                                # as-is
+        return candidates
 
     async def resolve_entity(self, chat_identifier: str):
         """
-        Resolve a chat identifier to an InputPeer the Telethon client can use directly.
+        Resolve a chat identifier to an InputPeer that Telethon can use directly.
 
-        Always scans live dialogs and returns ``dialog.input_entity`` (an InputPeerChannel /
-        InputPeerChat / InputPeerUser already built by Telethon from the server response).
-        This avoids struct-packing overflows that occur when channel IDs exceed 32 bits
-        (channel_id > 2^31) and Telethon internally tries to convert a Channel object to
-        an InputPeer via 32-bit struct fields.
-
-        For string identifiers (usernames / invite-links) the built-in ``get_entity`` is
-        still used as it handles those natively.
+        Returns ``dialog.input_entity`` — an InputPeerChannel / InputPeerChat /
+        InputPeerUser already built by Telethon from the server response.
+        This avoids struct-packing overflows when channel_id > 2^31.
         """
         client = await self.ensure_connected()
         parsed = self._parse_identifier(chat_identifier)
 
-        # String identifiers (e.g. "@username", "https://t.me/+xxx") — Telethon resolves natively
+        # String identifiers (@username, invite links) — Telethon resolves natively
         if isinstance(parsed, str):
             try:
                 return await client.get_entity(parsed)
@@ -228,30 +225,28 @@ class TelegramService:
                 async for dialog in client.iter_dialogs():
                     uname = getattr(dialog.entity, "username", None)
                     if uname and uname.lower() == target_username:
-                        logger.info("Resolved string entity '%s' via dialog scan", chat_identifier)
+                        logger.info("Resolved '%s' via dialog scan (username)", chat_identifier)
                         return dialog.input_entity
                 raise ValueError(
                     f"Could not resolve entity for '{chat_identifier}'. "
                     "Make sure the Telegram account is a member of this group/channel."
                 )
 
-        # Numeric identifier — compute the bare ID (strips the -100 prefix for channels)
-        target_bare = self._bare_id(parsed)
+        # Numeric identifier — generate all possible bare IDs
+        candidates = self._candidate_bare_ids(parsed)
 
         logger.info(
-            "Scanning dialogs for numeric entity '%s' (bare_id=%s)...",
-            chat_identifier, target_bare,
+            "Scanning dialogs for numeric entity '%s' (candidates=%s)...",
+            chat_identifier, candidates,
         )
         async for dialog in client.iter_dialogs():
             eid = getattr(dialog.entity, "id", None)
-            if eid is not None and target_bare is not None and eid == target_bare:
+            if eid is not None and eid in candidates:
                 logger.info(
-                    "Resolved numeric entity '%s' via dialog scan (bare_id=%d)",
-                    chat_identifier, eid,
+                    "Resolved '%s' via dialog scan → %s (entity.id=%d, type=%s)",
+                    chat_identifier, type(dialog.input_entity).__name__, eid,
+                    type(dialog.entity).__name__,
                 )
-                # Return input_entity (InputPeerChannel/Chat/User) — already serialised
-                # correctly by Telethon from the server response; avoids 32-bit overflow
-                # when channel_id > 2^31.
                 return dialog.input_entity
 
         raise ValueError(
