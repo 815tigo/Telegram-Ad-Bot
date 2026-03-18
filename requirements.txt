@@ -5,3 +5,4 @@ apscheduler
 sqlalchemy
 pydantic-settings
 pyyaml
+psycopg2-binary
